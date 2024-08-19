@@ -47,7 +47,6 @@ type Migration struct {
 	Migrate MigrateFunc
 	// Rollback will be executed on rollback. Can be nil.
 	Rollback RollbackFunc
-	applied  time.Time
 }
 
 // Gormigrate represents a collection of all migrations of a database schema.
@@ -342,12 +341,12 @@ func (g *Gormigrate) runInitSchema() error {
 	if err := g.initSchema(g.tx); err != nil {
 		return err
 	}
-	if err := g.insertMigration(initSchemaMigrationID); err != nil {
+	if err := g.insertMigration(initSchemaMigrationID, time.Now()); err != nil {
 		return err
 	}
 
 	for _, migration := range g.migrations {
-		if err := g.insertMigration(migration.ID); err != nil {
+		if err := g.insertMigration(migration.ID, time.Now()); err != nil {
 			return err
 		}
 	}
@@ -369,9 +368,7 @@ func (g *Gormigrate) runMigration(migration *Migration) error {
 			return err
 		}
 
-		migration.applied = time.Now()
-
-		if err := g.insertMigration(migration.ID); err != nil {
+		if err := g.insertMigration(migration.ID, time.Now()); err != nil {
 			return err
 		}
 	}
