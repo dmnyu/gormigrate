@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -46,6 +47,7 @@ type Migration struct {
 	Migrate MigrateFunc
 	// Rollback will be executed on rollback. Can be nil.
 	Rollback RollbackFunc
+	applied  time.Time
 }
 
 // Gormigrate represents a collection of all migrations of a database schema.
@@ -366,6 +368,7 @@ func (g *Gormigrate) runMigration(migration *Migration) error {
 		if err := migration.Migrate(g.tx); err != nil {
 			return err
 		}
+		migration.applied = time.Now()
 
 		if err := g.insertMigration(migration.ID); err != nil {
 			return err
