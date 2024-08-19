@@ -368,6 +368,7 @@ func (g *Gormigrate) runMigration(migration *Migration) error {
 		if err := migration.Migrate(g.tx); err != nil {
 			return err
 		}
+
 		migration.applied = time.Now()
 
 		if err := g.insertMigration(migration.ID); err != nil {
@@ -460,9 +461,11 @@ func (g *Gormigrate) unknownMigrationsHaveHappened() (bool, error) {
 	return false, nil
 }
 
-func (g *Gormigrate) insertMigration(id string) error {
+func (g *Gormigrate) insertMigration(id string, applied time.Time) error {
 	record := g.model()
 	reflect.ValueOf(record).Elem().FieldByName("ID").SetString(id)
+	s := applied.Format(time.RFC3339)
+	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(s)
 	return g.tx.Table(g.options.TableName).Create(record).Error
 }
 
