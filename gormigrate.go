@@ -341,12 +341,12 @@ func (g *Gormigrate) runInitSchema() error {
 	if err := g.initSchema(g.tx); err != nil {
 		return err
 	}
-	if err := g.insertMigration(initSchemaMigrationID, time.Now()); err != nil {
+	if err := g.insertMigration(initSchemaMigrationID); err != nil {
 		return err
 	}
 
 	for _, migration := range g.migrations {
-		if err := g.insertMigration(migration.ID, time.Now()); err != nil {
+		if err := g.insertMigration(migration.ID); err != nil {
 			return err
 		}
 	}
@@ -368,7 +368,7 @@ func (g *Gormigrate) runMigration(migration *Migration) error {
 			return err
 		}
 
-		if err := g.insertMigration(migration.ID, time.Now()); err != nil {
+		if err := g.insertMigration(migration.ID); err != nil {
 			return err
 		}
 	}
@@ -391,6 +391,7 @@ func (g *Gormigrate) model() interface{} {
 		)),
 	}
 
+	//adding a second struct field to store a unix timestamp
 	f2 := reflect.StructField{
 		Name: reflect.ValueOf("Applied").Interface().(string),
 		Type: reflect.TypeOf(""),
@@ -400,6 +401,8 @@ func (g *Gormigrate) model() interface{} {
 			32,
 		)),
 	}
+
+	//including second field in type
 	structType := reflect.StructOf([]reflect.StructField{f, f2})
 	structValue := reflect.New(structType).Elem()
 	return structValue.Addr().Interface()
@@ -468,10 +471,11 @@ func (g *Gormigrate) unknownMigrationsHaveHappened() (bool, error) {
 	return false, nil
 }
 
-func (g *Gormigrate) insertMigration(id string, applied time.Time) error {
+func (g *Gormigrate) insertMigration(id string) error {
 	record := g.model()
 	reflect.ValueOf(record).Elem().FieldByName("ID").SetString(id)
-	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(applied.Format(time.RFC3339))
+	//generating timestamp and formatting to RFC3339
+	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(time.Now().Format(time.RFC3339))
 	fmt.Println(record)
 	return g.tx.Table(g.options.TableName).Create(record).Error
 }
