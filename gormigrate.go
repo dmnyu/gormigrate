@@ -390,7 +390,17 @@ func (g *Gormigrate) model() interface{} {
 			g.options.IDColumnSize,
 		)),
 	}
-	structType := reflect.StructOf([]reflect.StructField{f})
+
+	f2 := reflect.StructField{
+		Name: reflect.ValueOf("Applied").Interface().(string),
+		Type: reflect.TypeOf(""),
+		Tag: reflect.StructTag(fmt.Sprintf(
+			`gorm:"column:%s;size:%d"`,
+			g.options.IDColumnName,
+			g.options.IDColumnSize,
+		)),
+	}
+	structType := reflect.StructOf([]reflect.StructField{f, f2})
 	structValue := reflect.New(structType).Elem()
 	return structValue.Addr().Interface()
 }
