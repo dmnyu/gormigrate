@@ -397,7 +397,7 @@ func (g *Gormigrate) model() interface{} {
 		Tag: reflect.StructTag(fmt.Sprintf(
 			`gorm:"column:%s;size:%d"`,
 			"applied",
-			g.options.IDColumnSize,
+			32,
 		)),
 	}
 	structType := reflect.StructOf([]reflect.StructField{f, f2})
@@ -471,8 +471,7 @@ func (g *Gormigrate) unknownMigrationsHaveHappened() (bool, error) {
 func (g *Gormigrate) insertMigration(id string, applied time.Time) error {
 	record := g.model()
 	reflect.ValueOf(record).Elem().FieldByName("ID").SetString(id)
-	s := applied.Format(time.RFC3339)
-	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(s)
+	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(applied.Format(time.RFC3339))
 	fmt.Println(record)
 	return g.tx.Table(g.options.TableName).Create(record).Error
 }
