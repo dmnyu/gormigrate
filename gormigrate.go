@@ -396,7 +396,7 @@ func (g *Gormigrate) model() interface{} {
 		Type: reflect.TypeOf(""),
 		Tag: reflect.StructTag(fmt.Sprintf(
 			`gorm:"column:%s;size:%d"`,
-			g.options.IDColumnName,
+			"applied",
 			g.options.IDColumnSize,
 		)),
 	}
