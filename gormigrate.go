@@ -473,6 +473,7 @@ func (g *Gormigrate) insertMigration(id string, applied time.Time) error {
 	reflect.ValueOf(record).Elem().FieldByName("ID").SetString(id)
 	s := applied.Format(time.RFC3339)
 	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(s)
+	fmt.Println(record)
 	return g.tx.Table(g.options.TableName).Create(record).Error
 }
 
