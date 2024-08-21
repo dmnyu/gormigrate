@@ -476,7 +476,6 @@ func (g *Gormigrate) insertMigration(id string) error {
 	reflect.ValueOf(record).Elem().FieldByName("ID").SetString(id)
 	//generating timestamp and formatting to RFC3339
 	reflect.ValueOf(record).Elem().FieldByName("Applied").SetString(time.Now().Format(time.RFC3339))
-	fmt.Println(record)
 	return g.tx.Table(g.options.TableName).Create(record).Error
 }
 
